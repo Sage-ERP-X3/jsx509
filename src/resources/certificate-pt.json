@@ -1,0 +1,16 @@
+{
+	"certNoPEM": "O certificado não tem o PEM",
+	"errorCA": "Erro na verificação do certificado com o certificado da autoridade de certificação {0}",
+	"errorDecrypt": "Erro descriptografar a chave privada (é possível que a senha esteja errada): {0}",
+	"errorSign": "Erro durante o teste de assinatura c/a chave privada {0}",
+	"errorVerify": "Erro durante o teste de verificação com o certificado {0}",
+	"noCA": "Nenhum certificados de autoridade de certificação será fornecida para o certificado",
+	"noPEM": "A chave privada não é PEM",
+	"wrongFormat": "A chave privada descriptografado não está no formaro DER",
+	"wrongKey": "A chave não é apropriada para o certificado",
+	"missingPassphrase": "Faltando senha",
+	"noOID": "Erro interno o algoritmo não é um OID",
+	"nonVerify": "A assinatura do certificado não pôde ser verificada",
+	"unsupportedAlg": "Algoritmo não suportado",
+	"wrongPass": "Senha incorreta"
+}

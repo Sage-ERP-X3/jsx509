@@ -1,0 +1,16 @@
+{
+	"certNoPEM": "证书没有PEM格式",
+	"errorCA": "在检验认证授权凭证的证书{0}时出错",
+	"errorDecrypt": "解密私钥时出错（口令短语可能不正确）：{0}",
+	"errorSign": "测试带有私钥{0}的签名时出错",
+	"errorVerify": "测试带有证书{0}的检验时出错",
+	"noCA": "所提供的认证授权凭证中没有任何一个适用于该证书",
+	"noPEM": "私钥没有PEM格式",
+	"wrongFormat": "已解密的私钥没有DER格式",
+	"wrongKey": "钥匙不适用于证书",
+	"missingPassphrase": "缺少口令短语",
+	"noOID": "内部错误：该算法不是一个OID",
+	"nonVerify": "未能验证该证书的签名",
+	"unsupportedAlg": "不支持的算法",
+	"wrongPass": "口令短语不正确"
+}
