@@ -158,11 +158,16 @@ exports.stripEncryption = function(key, passphrase, test) {
 };
 
 function _getDn(info) {
-	var result = "C=" + info.countryName + (info.stateOrProvinceName ? ", ST=" + info.stateOrProvinceName : "") + (info.localityName ? ", L=" + info.localityName : "") + ", O=" + info.organizationName + ", ";
+	var result = [];
+	if (info.countryName) result.push("C=" + info.countryName);
+	if (info.stateOrProvinceName) result.push("ST=" + info.stateOrProvinceName);
+	if (info.localityName) result.push("L=" + info.localityName);
+	if (info.organizationName) result.push("O=" + info.organizationName);
 	info.organizationalUnitNames.forEach(function(ou) {
-		result += "OU=" + ou + ", ";
+		result.push("OU=" + ou);
 	});
-	return result + "CN=" + info.commonName;
+	result.push("CN=" + info.commonName);
+	return result.join(", ");
 }
 
 function oidStrings(set, oid) {
@@ -199,6 +204,28 @@ class Certificate {
 	toString() {
 		return this.parsed.toString();
 	}
+	get sigAlgorithmName() {
+		var algorithm = this.parsed.children[1].children[0];
+		if (algorithm.type === asn1.types.OID) {
+			var cont = algorithm.getData().toString("binary");
+			switch (cont) {
+				case OIDS.pkcs1.sha1Rsa.toString("binary"):
+					return "RSA-SHA1";
+				case OIDS.pkcs1.sha256Rsa.toString("binary"):
+					return "RSA-SHA256";
+				case OIDS.pkcs1.sha384Rsa.toString("binary"):
+					return "RSA-SHA384";
+				case OIDS.pkcs1.sha512Rsa.toString("binary"):
+					return "RSA-SHA512";
+				case OIDS.pkcs1.sha224Rsa.toString("binary"):
+					return "RSA-SHA224";
+				default:
+					throw new Error(locale.format(module, "unsupportedAlg"));
+			}
+		} else {
+			throw new Error(locale.format(module, "noOID"));
+		}				
+	}
 	/// * `subject = cert.subject`  
 	///   Returns the subject information (see source for list of fields returned);
 	get subject() {
@@ -231,6 +258,41 @@ class Certificate {
 			commonName: oidStrings(node, OIDS.at.commonName)[0],
 		};
 	}
+	
+	/// * `serial = cert.serial`
+	///   Returns the certificate issuer serial number as a buffer
+	get serial() {
+		var node = this.parsed.children[0].children[this.shift];
+		if (node.type === asn1.types.INTEGER)
+			return node.getData();
+		else
+			throw new Error("Wrong type");
+	}
+	
+	/// * `serialDecimal = cert.serialDecimal`
+	///   Returns the certificate issuer serial number as a string in decimal representation
+	get serialDecimal() {
+		var serialParts = [0];
+		var serial = this.serial;
+		for (var i = 0; i<serial.length; i++) {
+			var extra = +serial[i];
+			var j = serialParts.length;
+			while (--j >= 0) {
+				var tmp = serialParts[j]*256+extra;
+				extra = Math.floor(tmp / 1000000000);
+				if (extra) serialParts[j] = tmp-extra*1000000000;
+				else serialParts[j] = tmp;
+			}
+			if (extra) serialParts.unshift(extra);
+		}
+		var serialResult = serialParts[0];
+		for (var i = 1; i < serialParts.length; i++) {
+			var tmp = "00000000"+serialParts[i];
+			serialResult += tmp.substr(tmp.length-9);
+		}
+		return serialResult;	
+	}
+	
 	/// * `issuerDn = cert.issuerDn`
 	///   Returns the distinguished name of the subject information in a single string
 	get issuerDn() {
@@ -256,6 +318,22 @@ class Certificate {
 		var node = this.parsed.children[0].children[this.shift + 5];
 		return node.children[1].getData();
 	}
+	/// * `publicKey = cert.publicKey`  
+	///   Returns an object with the data of the public key of the certificate  
+	get publicKeyDetails() {
+		var node = this.parsed.children[0].children[this.shift + 5];
+		var key = node.children[1].getData();
+		var keytype = node.children[0].children[0];
+		var o = asn1.fromBuffer(key);
+		// at the moment, only RSA keys are supported
+		if (keytype.type === asn1.types.OID && keytype.getData().toString("binary") === OIDS.pkcs1.rsa.toString("binary")) {		
+			var a = o.children[0].getData();
+			var b = o.children[1].getData();
+			return { modulus: a, exponent: b};
+		}
+		throw new Error("Wrong key type "+keytype.toString());
+	}
+	
 	/// * `verify(certificate)`
 	///   Verifies the signature of this certificate against the public key of the certificate 
 	///   as given in the parameter (certificate object or string with PEM format)
@@ -263,39 +341,16 @@ class Certificate {
 	verify(certificate) {
 		var tbs = this.parsed.children[0];
 		var tbsbuffer = asn1.toBuffer(tbs);
-		var algorithm = this.parsed.children[1].children[0];
-		var name;
-		if (algorithm.type === asn1.types.OID) {
-			var cont = algorithm.getData().toString("binary");
-			switch (cont) {
-				case OIDS.pkcs1.sha1Rsa.toString("binary"):
-					name = "RSA-SHA1";
-					break;
-				case OIDS.pkcs1.sha256Rsa.toString("binary"):
-					name = "RSA-SHA256";
-					break;
-				case OIDS.pkcs1.sha384Rsa.toString("binary"):
-					name = "RSA-SHA384";
-					break;
-				case OIDS.pkcs1.sha512Rsa.toString("binary"):
-					name = "RSA-SHA512";
-					break;
-				case OIDS.pkcs1.sha224Rsa.toString("binary"):
-					name = "RSA-SHA224";
-					break;
-				default:
-					throw new Error(locale.format(module, "unsupportedAlg"));
-			}
-			var verify = crypto.createVerify(name);
-			verify.update(tbsbuffer);
-			if (certificate instanceof Certificate) {
-				certificate = expandToPem(asn1.toBuffer(certificate.parsed), "CERTIFICATE");
-			}
-			if (!verify.verify(certificate, this.parsed.children[2].getData())) {
-				throw new Error(locale.format(module, "nonVerify"));
-			}
-			return true;
-		} else throw new Error(locale.format(module, "noOID"));
+		var name = this.sigAlgorithmName;
+		var verify = crypto.createVerify(name);
+		verify.update(tbsbuffer);
+		if (certificate instanceof Certificate) {
+			certificate = expandToPem(asn1.toBuffer(certificate.parsed), "CERTIFICATE");
+		}
+		if (!verify.verify(certificate, this.parsed.children[2].getData())) {
+			throw new Error(locale.format(module, "nonVerify"));
+		}
+		return true;
 	}
 }
 exports.Certificate = Certificate;
