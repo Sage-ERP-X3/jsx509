@@ -1,7 +1,7 @@
 {
   "name": "jsx509",
   "description": "X.509 utilities for JavaScript",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "license": "MIT",
   "homepage": "http://github.com/Sage-ERP-X3/jsx509",
   "repository": {
@@ -20,12 +20,15 @@
     "test": "node test"
   },
   "main": "index.js",
-  "contributors": [{
-    "name": "Eric Mueller"
-  }, {
-    "name": "Bruno Jouhier",
-    "email": "bruno.jouhier@sage.com"
-  }],
+  "contributors": [
+    {
+      "name": "Eric Mueller"
+    },
+    {
+      "name": "Bruno Jouhier",
+      "email": "bruno.jouhier@sage.com"
+    }
+  ],
   "readmeFilename": "README.md",
   "bugs": {
     "url": "https://github.com/Sage-ERP-X3/jsx509/issues"
