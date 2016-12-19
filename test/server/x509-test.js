@@ -74,7 +74,7 @@ test("verification of key and certificates", 9, function() {
 
 });
 
-test("certificate", 19, function() {
+test("certificate", 23, function() {
 	var certif = new Certificate(new Buffer(cert, "hex"));
 	equal(certif.subject.countryName, "FR", "countryName ok");
 	equal(certif.subject.stateOrProvinceName, "France", "stateOrProvinceName ok");
@@ -96,4 +96,9 @@ test("certificate", 19, function() {
 	equal(certif.notAfter, "1373759999000", "end date ok");
 	var publicKeyHex = "30818902818100887490bd6a939a3c42d3a56f99eb6fb3f45fa5c969f733392e6be15830e7eddf90d3537743f2a39709aa9552fd405f2b789688a9c3d70d2de4f0bbcd4e9aab43797836f47961ee8753323771653f12824b3aab5850aa890e267f49246a261834f6b4575d4ef72c785d5ce874398659ee8ca28a5f33b3ab65c2e47a3ad62e32a70203010001";
 	equal(certif.publicKey.toString("hex"), publicKeyHex, "public key ok");
+	equal(certif.serial.toString("hex"), "2069810a9ac51343d003816bac3ec14e", "Serial number");
+	equal(certif.serialDecimal, "43083104306282901916880809451497374030", "Serial number in decimal");
+	equal(certif.publicKeyDetails.modulus.toString("hex"), "887490bd6a939a3c42d3a56f99eb6fb3f45fa5c969f733392e6be15830e7eddf90d3537743f2a39709aa9552fd405f2b789688a9c3d70d2de4f0bbcd4e9aab43797836f47961ee8753323771653f12824b3aab5850aa890e267f49246a261834f6b4575d4ef72c785d5ce874398659ee8ca28a5f33b3ab65c2e47a3ad62e32a7", "Modulus");
+	equal(certif.publicKeyDetails.exponent.toString("hex"), "010001");
+
 });
