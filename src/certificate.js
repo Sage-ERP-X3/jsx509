@@ -166,7 +166,7 @@ function _getDn(info) {
 	info.organizationalUnitNames.forEach(function(ou) {
 		result.push("OU=" + ou);
 	});
-	result.push("CN=" + info.commonName);
+	if (info.commonName) result.push("CN=" + info.commonName);
 	return result.join(", ");
 }
 
