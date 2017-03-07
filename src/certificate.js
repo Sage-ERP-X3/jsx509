@@ -157,17 +157,28 @@ exports.stripEncryption = function(key, passphrase, test) {
 	} else throw new Error(locale.format(module, "noPEM"));
 };
 
-function _getDn(info) {
+// Convert object with parts of DN into string representation of DN.
+// Parameters:
+// info: object with countryName, stateOrProvinceName, localityName, organizationName, organizationalUnitNames, commonName
+// rfc2253: output separated just with comma without blank, starting with CN.
+function _getDn(info, rfc2253) {
+
+	function _escape(str) {
+		return str.replace(/([ ,\+"\\<>;])/g, "\\$1");
+	}
 	var result = [];
-	if (info.countryName) result.push("C=" + info.countryName);
-	if (info.stateOrProvinceName) result.push("ST=" + info.stateOrProvinceName);
-	if (info.localityName) result.push("L=" + info.localityName);
+	if (info.countryName) result.push("C=" + _escape(info.countryName));
+	if (info.stateOrProvinceName) result.push("ST=" + _escape(info.stateOrProvinceName));
+	if (info.localityName) result.push("L=" + _escape(info.localityName));
 	if (info.organizationName) result.push("O=" + info.organizationName);
 	info.organizationalUnitNames.forEach(function(ou) {
 		result.push("OU=" + ou);
 	});
 	if (info.commonName) result.push("CN=" + info.commonName);
-	return result.join(", ");
+	if (rfc2253)
+		return result.reverse().join(","); // without spaces
+	else
+		return result.join(", ");
 }
 
 function oidStrings(set, oid) {
@@ -238,6 +249,12 @@ class Certificate {
 			organizationalUnitNames: oidStrings(node, OIDS.at.organizationalUnitName),
 			commonName: oidStrings(node, OIDS.at.commonName)[0],
 		};
+	}
+	/// * `subjectDn = cert.subjectDn`
+	///   Returns the distinguished name of the subject information in a single string in RFC2253 format
+	///   starting with common name
+	get subjectDnRFC2253() {
+		return _getDn(this.subject, true);
 	}
 	/// * `subjectDn = cert.subjectDn`
 	///   Returns the distinguished name of the subject information in a single string
