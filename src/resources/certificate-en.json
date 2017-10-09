@@ -1,9 +1,9 @@
 {
 	"certNoPEM": "Certificate does not have PEM format",
-	"errorCA": "Error in verifying certificate with certificate of certification authority {0}",
-	"errorDecrypt": "Error when decrypting private key (maybe wrong passphrase): {0}",
-	"errorSign": "Error in signature test with private key {0}",
-	"errorVerify": "Error in verify test with certificate {0}",
+	"errorCA": "Error in verifying certificate with certificate of certification authority {{0}}",
+	"errorDecrypt": "Error when decrypting private key (maybe wrong passphrase): {{0}}",
+	"errorSign": "Error in signature test with private key {{0}}",
+	"errorVerify": "Error in verify test with certificate {{0}}",
 	"missingPassphrase": "Missing passphrase",
 	"noCA": "None of the given certificates of certification authorities fits to the certificate",
 	"noOID": "Internal error: Algorithm is not an OID",

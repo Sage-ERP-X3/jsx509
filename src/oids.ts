@@ -1,11 +1,9 @@
-"use strict";
-
-var toBuffer = exports.toBuffer = function(str) {
-	var vals = str.split('.').map(function(s) {
+export function toBuffer(str: string) {
+	var vals = str.split('.').map(function (s) {
 		return parseInt(s, 10);
 	});
 	var bytes = [40 * vals[0] + vals[1]];
-	vals.slice(2).forEach(function(val) {
+	vals.slice(2).forEach(function (val) {
 		var i = bytes.length;
 		while (val >= 128) {
 			bytes.splice(i, 0, val % 128);
@@ -17,7 +15,7 @@ var toBuffer = exports.toBuffer = function(str) {
 	return new Buffer(bytes);
 };
 
-var fromBuffer = exports.fromBuffer = function(buf) {
+export function fromBuffer(buf: Buffer) {
 	var vals = [Math.floor(buf[0] / 40), buf[0] % 40];
 	var pos = 1;
 	while (pos < buf.length) {
@@ -31,7 +29,9 @@ var fromBuffer = exports.fromBuffer = function(buf) {
 	return vals.join('.');
 };
 
-var OIDS = exports.OIDS = {
+export type Dict<T> = { [key: string]: T; };
+
+export const OIDS: Dict<Dict<Buffer>> = {
 	x9algorithm: {
 		dsa: toBuffer("1.2.840.10040.4.1"),
 		dsaSha1: toBuffer("1.2.840.10040.4.3"),
@@ -250,15 +250,15 @@ var OIDS = exports.OIDS = {
 	},
 };
 
-var names = exports.names = {};
+export const names: Dict<string> = {};
 
-Object.keys(OIDS).forEach(function(ns) {
-	Object.keys(OIDS[ns]).forEach(function(k) {
+Object.keys(OIDS).forEach(function (ns) {
+	Object.keys(OIDS[ns]).forEach(function (k) {
 		names[fromBuffer(OIDS[ns][k])] = ns + "." + k;
 	});
 });
 
-exports.toString = function(buf) {
+export function toString(buf: Buffer) {
 	var path = fromBuffer(buf);
 	return path + " (" + names[path] + ")";
 };

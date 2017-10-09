@@ -1,0 +1,27 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "target": "es2015",
+        "sourceMap": true,
+        "declaration": true,
+        "noUnusedLocals": true,
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "strictNullChecks": false,
+        "experimentalDecorators": true,
+        "watch": false,
+        "outDir": "build",
+        "rootDir": ".",
+        "baseUrl": ".",
+        "paths": {
+            "*": [
+                "../../node_modules/*"
+            ]
+        }
+    },
+    "exclude": [
+        "node_modules",
+        "build"
+    ]
+}

@@ -1,9 +1,9 @@
 {
 	"certNoPEM": "Le certificat n'a pas le format PEM",
-	"errorCA": "Erreur lors de la vérification du certificat avec le certificat de l'autorité de certification {0}",
-	"errorDecrypt": "Erreur lors du décryptage de la clé privée (il est possible que la phrase secrète soit erronée) : {0}",
-	"errorSign": "Erreur lors du test de signature avec la clé privée {0}",
-	"errorVerify": "Erreur lors du test de vérification avec le certificat {0}",
+	"errorCA": "Erreur lors de la vérification du certificat avec le certificat de l'autorité de certification {{0}}",
+	"errorDecrypt": "Erreur lors du décryptage de la clé privée (il est possible que la phrase secrète soit erronée) : {{0}}",
+	"errorSign": "Erreur lors du test de signature avec la clé privée {{0}}",
+	"errorVerify": "Erreur lors du test de vérification avec le certificat {{0}}",
 	"noCA": "Aucun des certificats d'autorités de certification fournis ne convient pour le certificat",
 	"noPEM": "La clé privée n'a pas le format PEM",
 	"wrongFormat": "La clé privée décryptée n'a pas le format DER",

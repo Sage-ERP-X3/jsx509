@@ -4,12 +4,13 @@
 /// 
 /// Functions and classes for handling certificates and private keys
 ///
-var locale = require("streamline-locale");
-var asn1 = require("./asn1");
-var types = asn1.types;
-var OIDS = require("./oids").OIDS;
-var crypto = require('crypto');
-var util = require('util');
+import { locale } from 'f-locale';
+import * as asn1 from './asn1';
+import { types, Node } from './asn1';
+import { OIDS } from './oids';
+import * as crypto from 'crypto';
+debugger;
+const resources = locale.resources(__filename);
 
 /// ## Verify integrity of certificate, private key, passphrase, CA certificates
 ///  When CA certificates are given, find out whether one of them signs the given certificate
@@ -17,8 +18,13 @@ var util = require('util');
 ///  - key: decrypted private key (if available)
 ///  - cert: certificate object
 ///  - error: error string if error has occurred
-exports.integrity = function(certificate, key, passphrase, cacerts) {
-	var result = {};
+export interface IntegrityResult {
+	cert?: Certificate;
+	key?: string;
+	error?: string;
+}
+export function integrity(certificate: string, key: string, passphrase: string, cacerts: string[]): IntegrityResult {
+	var result = {} as IntegrityResult;
 	// remove encryption of key
 	if (certificate) {
 		try {
@@ -32,7 +38,7 @@ exports.integrity = function(certificate, key, passphrase, cacerts) {
 	}
 	if (key) {
 		try {
-			var decrypted = exports.stripEncryption(key, passphrase, true);
+			var decrypted = stripEncryption(key, passphrase, true);
 		} catch (e) {
 			return {
 				error: ((e instanceof Error) ? e.message : "" + e)
@@ -49,19 +55,19 @@ exports.integrity = function(certificate, key, passphrase, cacerts) {
 			} catch (e) {
 				console.error(e);
 				return {
-					error: locale.format(module, "errorSign", e)
+					error: resources.format("errorSign", e)
 				};
 			}
 			var verify = crypto.createVerify("RSA-SHA1");
 			verify.update(testBuffer);
 			try {
 				if (!verify.verify(certificate, signature)) return {
-					error: locale.format(module, "wrongKey")
+					error: resources.format("wrongKey")
 				};
 			} catch (e) {
 				console.error(e);
 				return {
-					error: locale.format(module, "errorVerify", e)
+					error: resources.format("errorVerify", e)
 				};
 			}
 		}
@@ -78,11 +84,11 @@ exports.integrity = function(certificate, key, passphrase, cacerts) {
 		}
 		if (err) {
 			return {
-				error: locale.format(module, "errorCA", err)
+				error: resources.format("errorCA", err)
 			};
 		} else {
 			return {
-				error: locale.format(module, "noCA")
+				error: resources.format("noCA")
 			};
 		}
 	}
@@ -96,12 +102,12 @@ exports.integrity = function(certificate, key, passphrase, cacerts) {
 ///   When the private key has not been encrypted, the passphrase will be ignored and the private key will be returned unchanged.
 ///   If the optional 3rd parameter `test` is set, the function parses the resulting private key to check whether it has the correct format (ASN.1).
 ///
-exports.stripEncryption = function(key, passphrase, test) {
+export function stripEncryption(key: string, passphrase: string, test?: boolean) {
 	var r = /^-----BEGIN ((?:RSA )*PRIVATE KEY)-----\s+(?:Proc-Type: ([\w,]+)\s+DEK-Info: ([\-\w]+)(?:,(\w+))?)?(?:([\w\=\/\+\s]+))/.exec(key);
 	if (r) {
 		// remove spaces 
 		if (r[2] === '4,ENCRYPTED') {
-			if (!passphrase) throw new Error(locale.format(module, "missingPassphrase"));
+			if (!passphrase) throw new Error(resources.format("missingPassphrase"));
 			if (r[4]) {
 				var iv = new Buffer(r[4], "hex");
 				passphrase = passphrase || "";
@@ -119,8 +125,9 @@ exports.stripEncryption = function(key, passphrase, test) {
 				var ds = "";
 				while (ds.length < keyLength) {
 					var hash = crypto.createHash('md5');
-					hash.update(ds, 'binary');
-					hash.update(passphrase, 'binary');
+					// TODO: check if 'latin1' works, to eliminate cast
+					hash.update(ds, 'binary' as any);
+					hash.update(passphrase, 'binary' as any);
 					hash.update(iv);
 					var dig = hash.digest();
 					if (Buffer.isBuffer(dig)) {
@@ -140,38 +147,46 @@ exports.stripEncryption = function(key, passphrase, test) {
 				var b2 = cipher.final('binary');
 			} catch (e) {
 				// node 0.10 throws TypeError on wrong passphrase but node 0.10 throw regular error so we test its message.
-				if (e instanceof TypeError || /^error:06065064:/.test(e.message)) throw new Error(locale.format(module, "wrongPass"));
-				throw new Error(locale.format(module, "errorDecrypt", e));
+				if (e instanceof TypeError || /^error:06065064:/.test(e.message)) throw new Error(resources.format("wrongPass"));
+				throw new Error(resources.format("errorDecrypt", e));
 			}
 			buffer = new Buffer(b1 + b2, 'binary');
 			if (test) {
 				try {
 					asn1.fromBuffer(buffer);
 				} catch (e) {
-					throw new Error(locale.format(module, "wrongFormat"));
+					throw new Error(resources.format("wrongFormat"));
 				}
 			}
 			key = expandToPem(buffer, r[1]);
 		}
 		return key;
-	} else throw new Error(locale.format(module, "noPEM"));
+	} else throw new Error(resources.format("noPEM"));
 };
 
 // Convert object with parts of DN into string representation of DN.
 // Parameters:
 // info: object with countryName, stateOrProvinceName, localityName, organizationName, organizationalUnitNames, commonName
 // rfc2253: output separated just with comma without blank, starting with CN.
-function _getDn(info, rfc2253) {
+export interface CertficateInfo {
+	countryName: string;
+	stateOrProvinceName: string;
+	localityName: string;
+	organizationName: string;
+	organizationalUnitNames: string[];
+	commonName: string;
+}
+function _getDn(info: CertficateInfo, rfc2253?: boolean) {
 
-	function _escape(str) {
+	function _escape(str: string) {
 		return str.replace(/([ ,\+"\\<>;])/g, "\\$1");
 	}
-	var result = [];
+	var result: string[] = [];
 	if (info.countryName) result.push("C=" + _escape(info.countryName));
 	if (info.stateOrProvinceName) result.push("ST=" + _escape(info.stateOrProvinceName));
 	if (info.localityName) result.push("L=" + _escape(info.localityName));
 	if (info.organizationName) result.push("O=" + info.organizationName);
-	info.organizationalUnitNames.forEach(function(ou) {
+	info.organizationalUnitNames.forEach(function (ou) {
 		result.push("OU=" + ou);
 	});
 	if (info.commonName) result.push("CN=" + info.commonName);
@@ -181,11 +196,11 @@ function _getDn(info, rfc2253) {
 		return result.join(", ");
 }
 
-function oidStrings(set, oid) {
+function oidStrings(set: Node, oid: Buffer) {
 	var oidNode = asn1.createNode(types.OID, oid);
-	return set.children.filter(function(n) {
+	return set.children!.filter(function (n) {
 		return n.children[0].children[0].equals(oidNode);
-	}).map(function(n) {
+	}).map(function (n) {
 		var vnode = n.children[0].children[1];
 		return vnode.buf.slice(vnode.pos, vnode.pos + vnode.len).toString("utf8");
 	});
@@ -195,13 +210,15 @@ function oidStrings(set, oid) {
 /// 
 /// * `cert = new Certificate(buf)`  
 ///   Creates a new certificate object from an X509 buffer or a PEM content
-class Certificate {
-	constructor(buffer) {
+export class Certificate {
+	private parsed: Node;
+	private shift: number;
+	constructor(buffer: Buffer | string) {
 		if (!Buffer.isBuffer(buffer)) {
 			// assume PEM content
 			var startIndex = buffer.indexOf('-----BEGIN CERTIFICATE-----');
 			var endIndex = buffer.indexOf('-----END CERTIFICATE-----');
-			if (startIndex < 0 || endIndex < 0) throw new Error(locale.format(module, "certNoPEM"));
+			if (startIndex < 0 || endIndex < 0) throw new Error(resources.format("certNoPEM"));
 			var b64 = buffer.substring(startIndex + 27, endIndex);
 			buffer = new Buffer(b64, "base64");
 		}
@@ -231,11 +248,11 @@ class Certificate {
 				case OIDS.pkcs1.sha224Rsa.toString("binary"):
 					return "RSA-SHA224";
 				default:
-					throw new Error(locale.format(module, "unsupportedAlg"));
+					throw new Error(resources.format("unsupportedAlg"));
 			}
 		} else {
-			throw new Error(locale.format(module, "noOID"));
-		}				
+			throw new Error(resources.format("noOID"));
+		}
 	}
 	/// * `subject = cert.subject`  
 	///   Returns the subject information (see source for list of fields returned);
@@ -275,7 +292,7 @@ class Certificate {
 			commonName: oidStrings(node, OIDS.at.commonName)[0],
 		};
 	}
-	
+
 	/// * `serial = cert.serial`
 	///   Returns the certificate issuer serial number as a buffer
 	get serial() {
@@ -285,31 +302,31 @@ class Certificate {
 		else
 			throw new Error("Wrong type");
 	}
-	
+
 	/// * `serialDecimal = cert.serialDecimal`
 	///   Returns the certificate issuer serial number as a string in decimal representation
 	get serialDecimal() {
 		var serialParts = [0];
 		var serial = this.serial;
-		for (var i = 0; i<serial.length; i++) {
+		for (var i = 0; i < serial.length; i++) {
 			var extra = +serial[i];
 			var j = serialParts.length;
 			while (--j >= 0) {
-				var tmp = serialParts[j]*256+extra;
+				const tmp = serialParts[j] * 256 + extra;
 				extra = Math.floor(tmp / 1000000000);
-				if (extra) serialParts[j] = tmp-extra*1000000000;
+				if (extra) serialParts[j] = tmp - extra * 1000000000;
 				else serialParts[j] = tmp;
 			}
 			if (extra) serialParts.unshift(extra);
 		}
-		var serialResult = serialParts[0];
+		var serialResult = '' + serialParts[0];
 		for (var i = 1; i < serialParts.length; i++) {
-			var tmp = "00000000"+serialParts[i];
-			serialResult += tmp.substr(tmp.length-9);
+			const tmp = "00000000" + serialParts[i];
+			serialResult += tmp.substr(tmp.length - 9);
 		}
-		return serialResult;	
+		return serialResult;
 	}
-	
+
 	/// * `issuerDn = cert.issuerDn`
 	///   Returns the distinguished name of the subject information in a single string
 	get issuerDn() {
@@ -343,19 +360,19 @@ class Certificate {
 		var keytype = node.children[0].children[0];
 		var o = asn1.fromBuffer(key);
 		// at the moment, only RSA keys are supported
-		if (keytype.type === asn1.types.OID && keytype.getData().toString("binary") === OIDS.pkcs1.rsa.toString("binary")) {		
+		if (keytype.type === asn1.types.OID && keytype.getData().toString("binary") === OIDS.pkcs1.rsa.toString("binary")) {
 			var a = o.children[0].getData();
 			var b = o.children[1].getData();
-			return { modulus: a, exponent: b};
+			return { modulus: a, exponent: b };
 		}
-		throw new Error("Wrong key type "+keytype.toString());
+		throw new Error("Wrong key type " + keytype.toString());
 	}
-	
+
 	/// * `verify(certificate)`
 	///   Verifies the signature of this certificate against the public key of the certificate 
 	///   as given in the parameter (certificate object or string with PEM format)
 	///   Result is true, when the verification is successful.
-	verify(certificate) {
+	verify(certificate: Certificate | string) {
 		var tbs = this.parsed.children[0];
 		var tbsbuffer = asn1.toBuffer(tbs);
 		var name = this.sigAlgorithmName;
@@ -365,16 +382,15 @@ class Certificate {
 			certificate = expandToPem(asn1.toBuffer(certificate.parsed), "CERTIFICATE");
 		}
 		if (!verify.verify(certificate, this.parsed.children[2].getData())) {
-			throw new Error(locale.format(module, "nonVerify"));
+			throw new Error(resources.format("nonVerify"));
 		}
 		return true;
 	}
 }
-exports.Certificate = Certificate;
 
 // Expands a buffer with DER encoded data to the corresponding PEM format. The name of the resulting 
 // type (e. g. CERTIFICATE, RSA PRIVATE KEY) must be given in the second parameter 
-function expandToPem(buffer, name) {
+function expandToPem(buffer: Buffer, name: string) {
 	var result = "-----BEGIN " + name + "-----\n";
 	var text = buffer.toString("base64");
 	var i;

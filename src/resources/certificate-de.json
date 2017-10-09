@@ -1,9 +1,9 @@
 {
 	"certNoPEM": "Zertifikat nicht im PEM-Format",
-	"errorCA": "Fehler bei der Verifizierung des Zertifikats mit Zertifikat der Prüfstelle {0}",
-	"errorDecrypt": "Fehler beim Entschlüsseln des privaten Schlüssels (evtl. falsche Passphrase): {0}",
-	"errorSign": "Fehler beim Signaturtest mit privatem Schlüssel {0}",
-	"errorVerify": "Fehler beim Verifizierungstest mit Zertifikat {0}",
+	"errorCA": "Fehler bei der Verifizierung des Zertifikats mit Zertifikat der Prüfstelle {{0}}",
+	"errorDecrypt": "Fehler beim Entschlüsseln des privaten Schlüssels (evtl. falsche Passphrase): {{0}}",
+	"errorSign": "Fehler beim Signaturtest mit privatem Schlüssel {{0}}",
+	"errorVerify": "Fehler beim Verifizierungstest mit Zertifikat {{0}}",
 	"noCA": "Keines der gegegebenen Zertifikate der Prüfstelle passt zum Zertifikat",
 	"noPEM": "Privater Schlüssel nicht im PEM-Format",
 	"wrongFormat": "Entschlüsselter privater Schlüssel nicht im DER-Format",

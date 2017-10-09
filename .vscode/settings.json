@@ -1,0 +1,8 @@
+{
+    "editor.formatOnSave": true,
+    "files.exclude": {
+        "**/node_modules": true,
+        "**/buil": true
+    },
+    "typescript.tsdk": "./node_modules/typescript/lib"
+}
