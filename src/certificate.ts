@@ -20,7 +20,7 @@ export interface IntegrityResult {
 	key?: string;
 	error?: string;
 }
-export function integrity(certificate: string, key: string, passphrase: string, cacerts: string[]): IntegrityResult {
+export function integrity(certificate: string, key: string, passphrase: string, cacerts?: string[]): IntegrityResult {
 	const result = {} as IntegrityResult;
 	// remove encryption of key
 	let cert: Certificate;
