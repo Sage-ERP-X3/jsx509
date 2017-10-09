@@ -14,13 +14,13 @@ import { OIDS } from './oids';
 ///   `cert` must be in X509 DER (binary) format.  
 ///   Returns the signature object in X509 DER (binary) format, as a Buffer 
 export function buildSignature(cert: Buffer, hash: Buffer, signature: Buffer) {
-	var certNode = asn1.fromBuffer(cert);
-	var serial = certNode.children[0].children[1];
-	var issuer = certNode.children[0].children[3];
+	const certNode = asn1.fromBuffer(cert);
+	const serial = certNode.children[0].children[1];
+	const issuer = certNode.children[0].children[3];
 
-	var root = asn1.createNode(types.SEQ);
+	const root = asn1.createNode(types.SEQ);
 	root.add(types.OID, OIDS.pkcs7.signedData);
-	var signedData = root.addEoc(types.SEQ);
+	const signedData = root.addEoc(types.SEQ);
 	// version
 	signedData.addInt(1);
 	// digestAlgorithms
@@ -31,11 +31,11 @@ export function buildSignature(cert: Buffer, hash: Buffer, signature: Buffer) {
 	signedData.addEoc(certNode);
 	// crls (TODO)
 	// signerInfos
-	var signerInfo = signedData.addSet().addSeq();
+	const signerInfo = signedData.addSet().addSeq();
 	// version
 	signerInfo.addInt(1);
 	// issuer and serial number
-	var issuerAndSerial = signerInfo.addSeq();
+	const issuerAndSerial = signerInfo.addSeq();
 	issuerAndSerial.add(issuer);
 	issuerAndSerial.add(serial);
 	// digest algorithm
@@ -57,4 +57,4 @@ export function guessSignatureSize(cert: Buffer) {
 	// sha1 hash is 20 bytes and rsa signature is 128 bytes (key = 1k)
 	// quad them to be on the safe side
 	return buildSignature(cert, new Buffer(4 * 20), new Buffer(4 * 128)).length;
-};
+}
