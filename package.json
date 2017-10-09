@@ -25,7 +25,8 @@
     "lint": "tslint -e 'node_modules/**' -p .",
     "test": "node_modules/mocha/bin/mocha build/test"
   },
-  "main": "index.js",
+  "main": "build/index.js",
+  "typings": "build/index.d.ts",
   "contributors": [
     {
       "name": "Eric Mueller"
