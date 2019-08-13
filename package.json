@@ -1,7 +1,7 @@
 {
   "name": "jsx509",
   "description": "X.509 utilities for JavaScript",
-  "version": "1.2.3",
+  "version": "2.0.0",
   "license": "MIT",
   "homepage": "http://github.com/Sage-ERP-X3/jsx509",
   "repository": {
@@ -9,21 +9,21 @@
     "url": "git://github.com/Sage-ERP-X3/jsx509.git"
   },
   "dependencies": {
-    "chai": "^4.1.2",
-    "f-locale": "^1.0.8",
-    "mocha": "^4.0.1"
+    "f-locale": "^2.0.0"
   },
   "devDependencies": {
-    "@types/chai": "^4.0.4",
-    "@types/mocha": "^2.2.43",
-    "@types/node": "^8.0.33",
     "copyfiles": "^1.2.0",
-    "typescript": "^2.5.3"
+    "@types/chai": "^4.1.7",
+    "@types/mocha": "^5.2.7",
+    "@types/node": "^10.0.0",
+    "chai": "^4.2.0",
+    "mocha": "^5.2.0",
+    "typescript": "^3.5.2"
   },
   "scripts": {
     "prepare": "mkdir -p build && copyfiles {src,test}/**/*.{json,key,crt} build && node_modules/typescript/bin/tsc",
     "lint": "tslint -e 'node_modules/**' -p .",
-    "test": "node_modules/mocha/bin/mocha build/test"
+    "test": "node_modules/mocha/bin/mocha --exit build/test"
   },
   "main": "build/index.js",
   "typings": "build/index.d.ts",

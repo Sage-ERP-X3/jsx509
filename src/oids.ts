@@ -12,7 +12,7 @@ export function toBuffer(str: string) {
 		bytes.splice(i, 0, val);
 		for (; i < bytes.length - 1; i++) bytes[i] |= 0x80;
 	});
-	return new Buffer(bytes);
+	return Buffer.from(bytes);
 }
 
 export function fromBuffer(buf: Buffer) {

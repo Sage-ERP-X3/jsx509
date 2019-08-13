@@ -46,7 +46,7 @@ export function integrity(certificate: string, key: string, passphrase: string, 
 		result.key = decrypted;
 		if (certificate) {
 			// sign and verify
-			const testBuffer = new Buffer('abcdefghijklmnopqrstuvwxyz');
+			const testBuffer = Buffer.from('abcdefghijklmnopqrstuvwxyz');
 			const sign = crypto.createSign('RSA-SHA1');
 			sign.update(testBuffer);
 			let signature: Buffer;
@@ -112,7 +112,7 @@ export function stripEncryption(key: string, passphrase: string, test?: boolean)
 			if (!passphrase) throw new Error(resources.format('missingPassphrase'));
 			let cipher: crypto.Decipher;
 			if (r[4]) {
-				const iv = new Buffer(r[4], 'hex');
+				const iv = Buffer.from(r[4], 'hex');
 				passphrase = passphrase || '';
 				let keyLength = 24;
 				switch (r[3]) {
@@ -139,12 +139,12 @@ export function stripEncryption(key: string, passphrase: string, test?: boolean)
 						ds += dig;
 					}
 				}
-				const keypass = new Buffer(ds.substr(0, keyLength), 'binary');
+				const keypass = Buffer.from(ds.substr(0, keyLength), 'binary');
 				cipher = crypto.createDecipheriv(r[3], keypass, iv);
 			} else {
 				throw new Error('Wrong private key format: missing salt');
 			}
-			let buffer = new Buffer(r[5].replace(/\s+/g, ''), 'base64');
+			let buffer = Buffer.from(r[5].replace(/\s+/g, ''), 'base64');
 			let b1, b2: string;
 			try {
 				b1 = cipher.update(buffer, null, 'binary');
@@ -154,7 +154,7 @@ export function stripEncryption(key: string, passphrase: string, test?: boolean)
 				if (e instanceof TypeError || /^error:06065064:/.test(e.message)) throw new Error(resources.format('wrongPass'));
 				throw new Error(resources.format('errorDecrypt', e));
 			}
-			buffer = new Buffer(b1 + b2, 'binary');
+			buffer = Buffer.from(b1 + b2, 'binary');
 			if (test) {
 				try {
 					asn1.fromBuffer(buffer);
@@ -222,7 +222,7 @@ export class Certificate {
 			const endIndex = buffer.indexOf('-----END CERTIFICATE-----');
 			if (startIndex < 0 || endIndex < 0) throw new Error(resources.format('certNoPEM'));
 			const b64 = buffer.substring(startIndex + 27, endIndex);
-			buffer = new Buffer(b64, 'base64');
+			buffer = Buffer.from(b64, 'base64');
 		}
 		this.parsed = asn1.fromBuffer(buffer);
 		const type = this.parsed.children[0].children[0].type;
