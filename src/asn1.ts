@@ -209,5 +209,5 @@ exports.toString = function(node: Node, enc?: string) {
 };
 
 exports.fromString = function(str: string, enc?: string) {
-    return fromBuffer(Buffer.from(str, enc || 'hex'));
+    return fromBuffer(Buffer.from(str, enc as BufferEncoding || 'hex'));
 };

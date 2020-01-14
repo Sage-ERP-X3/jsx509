@@ -9,16 +9,16 @@
     "url": "git://github.com/Sage-ERP-X3/jsx509.git"
   },
   "dependencies": {
-    "f-locale": "^2.0.0"
+    "f-locale": "^2.0.1"
   },
   "devDependencies": {
-    "copyfiles": "^1.2.0",
-    "@types/chai": "^4.1.7",
+    "copyfiles": "^2.1.1",
+    "@types/chai": "^4.2.7",
     "@types/mocha": "^5.2.7",
-    "@types/node": "^10.0.0",
+    "@types/node": "^12.0.0",
     "chai": "^4.2.0",
-    "mocha": "^5.2.0",
-    "typescript": "^3.5.2"
+    "mocha": "^7.0.0",
+    "typescript": "^3.7.4"
   },
   "scripts": {
     "prepare": "mkdir -p build && copyfiles {src,test}/**/*.{json,key,crt} build && node_modules/typescript/bin/tsc",
