@@ -1,43 +1,44 @@
 {
-  "name": "jsx509",
-  "description": "X.509 utilities for JavaScript",
-  "version": "2.0.1",
-  "license": "MIT",
-  "homepage": "http://github.com/Sage-ERP-X3/jsx509",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/Sage-ERP-X3/jsx509.git"
-  },
-  "dependencies": {
-    "f-locale": "^2.0.1"
-  },
-  "devDependencies": {
-    "copyfiles": "^2.2.0",
-    "@types/chai": "^4.2.11",
-    "@types/mocha": "^7.0.2",
-    "@types/node": "^12.0.0",
-    "chai": "^4.2.0",
-    "mocha": "^7.1.1",
-    "typescript": "^3.8.3"
-  },
-  "scripts": {
-    "prepare": "mkdir -p build && copyfiles {src,test}/**/*.{json,key,crt} build && node_modules/typescript/bin/tsc",
-    "lint": "tslint -e 'node_modules/**' -p .",
-    "test": "node_modules/mocha/bin/mocha --exit build/test"
-  },
-  "main": "build/index.js",
-  "typings": "build/index.d.ts",
-  "contributors": [
-    {
-      "name": "Eric Mueller"
+    "name": "jsx509",
+    "description": "X.509 utilities for JavaScript",
+    "version": "2.0.1",
+    "license": "MIT",
+    "homepage": "http://github.com/Sage-ERP-X3/jsx509",
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/Sage-ERP-X3/jsx509.git"
     },
-    {
-      "name": "Bruno Jouhier",
-      "email": "bruno.jouhier@sage.com"
+    "dependencies": {
+        "f-locale": "^2.0.1"
+    },
+    "devDependencies": {
+        "copyfiles": "^2.2.0",
+        "@types/chai": "^4.2.11",
+        "@types/mocha": "^7.0.2",
+        "@types/node": "^12.0.0",
+        "chai": "^4.2.0",
+        "mkdirp": "1.0.4",
+        "mocha": "^7.1.1",
+        "typescript": "^3.8.3"
+    },
+    "scripts": {
+        "prepare": "mkdirp build && copyfiles {src,test}/**/*.{json,key,crt} build && tsc",
+        "lint": "tslint -e 'node_modules/**' -p .",
+        "test": "node_modules/mocha/bin/mocha --exit build/test"
+    },
+    "main": "build/index.js",
+    "typings": "build/index.d.ts",
+    "contributors": [
+        {
+            "name": "Eric Mueller"
+        },
+        {
+            "name": "Bruno Jouhier",
+            "email": "bruno.jouhier@sage.com"
+        }
+    ],
+    "readmeFilename": "README.md",
+    "bugs": {
+        "url": "https://github.com/Sage-ERP-X3/jsx509/issues"
     }
-  ],
-  "readmeFilename": "README.md",
-  "bugs": {
-    "url": "https://github.com/Sage-ERP-X3/jsx509/issues"
-  }
 }
